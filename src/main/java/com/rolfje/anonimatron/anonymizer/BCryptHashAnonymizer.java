@@ -24,22 +24,38 @@ public class BCryptHashAnonymizer implements Anonymizer {
 
     @Override
     public Synonym anonymize(Object from, int size, boolean shortlived, Map<String, String> parameters) {
-        String variant = DEFAULT_VARIANT;
-        if (parameters != null && parameters.containsKey('variant')) {
-            variant = parameters.get('variant');
+        if (from == null) {
+            return null;
         }
 
-        String difficulty = DEFAULT_DIFFICULTY;
-        if (parameters != null && parameters.containsKey('difficulty')) {
-            difficulty = parameters.get('difficulty');
+        if (from instanceof String) {
+            String variant = DEFAULT_VARIANT;
+            if (parameters != null && parameters.containsKey("variant")) {
+                variant = parameters.get("variant");
+            }
+
+            String difficulty = DEFAULT_DIFFICULTY;
+            if (parameters != null && parameters.containsKey("difficulty")) {
+                difficulty = parameters.get("difficulty");
+            }
+
+            return anonymize(from, size, shortlived, variant, difficulty);
         }
 
-        return anonymize(from, size, shortlived, variant, difficulty);
+        throw new UnsupportedOperationException("Can not anonymize objects of type " + from.getClass());
     }
 
     @Override
     public Synonym anonymize(Object from, int size, boolean shortlived) {
-        return anonymize(from, size, shortlived, DEFAULT_VARIANT, DEFAULT_DIFFICULTY);
+         if (from == null) {
+            return null;
+        }
+
+        if (from instanceof String) {
+            return anonymize(from, size, shortlived, DEFAULT_VARIANT, DEFAULT_DIFFICULTY);
+        }
+
+        throw new UnsupportedOperationException("Can not anonymize objects of type " + from.getClass());
     }
 
     private Synonym anonymize(Object from, int size, boolean shortlived, String variant, String difficulty) {
@@ -53,7 +69,7 @@ public class BCryptHashAnonymizer implements Anonymizer {
         sb.append("$");
 
         for (int i = sb.length(); i < length; i++) {
-            sb.append(characters.charAt(RANDOM.nextInt(characters.length())));
+            sb.append(CHARS.charAt(RANDOM.nextInt(CHARS.length())));
         }
 
         return new StringSynonym(
